@@ -2,32 +2,42 @@ package modelo;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.StringTokenizer;
 
 public class Compresion {
 	
-	private String datos;
+	public String datos;
 	private Fuente fuente;
 	
 	
-	public Compresion() {
+	public Compresion(String nombre_archivo) {
 		this.fuente = new Fuente();
-		this.readFile();
+		this.readFile(nombre_archivo);
 		this.genera_Fuente();
 	}
+	
+	
 
 
-	public void readFile( ) {
+	public void readFile(String nombre_archivo) {
 		
 		try {
-			  
-			BufferedReader in = new BufferedReader(new FileReader("anexo1.txt"));
+			String linea;
 			
-	        datos = in.readLine();
+			BufferedReader in = new BufferedReader(new FileReader(nombre_archivo));
+			StringBuilder text = new StringBuilder();
+	        
+			while ((linea = in.readLine()) != null)
+	        	text.append(linea + "\n");
+	        	
+	        datos = text.toString();
+	        
 	        in.close();
 	        
 	    }
@@ -37,13 +47,13 @@ public class Compresion {
 	}
 	
 	
-	public void writeFile(String nombre_archivo, String resultado) {
+	public void writeFile(String nombre_archivo, String codificacion) {
 		
 		try {
 			
 			BufferedWriter bw = new BufferedWriter(new FileWriter(nombre_archivo, false));
 			
-			bw.write(resultado);
+			bw.write(codificacion);
 			bw.close();
 		}
 		catch (IOException e) {
@@ -53,29 +63,40 @@ public class Compresion {
 	
 	
 	public void genera_Fuente() {
-		int a,b;
-		String codigo;
+		int i;
+		char c;
+		String simbolo;
 		
-		a = 0;
-		//b = this.digitos;
-		/*
-		codigo = datos.substring(a, b);
-		this.fuente.getSimbolos().add(new Simbolo(codigo));
-		while ( b < datos.length() ) {
-			a = b;
-			//b += this.digitos;
-			codigo = datos.substring(a, b);
-			
-			Iterator<Simbolo> it = this.fuente.getSimbolos().iterator();
+		this.fuente.getSimbolos().add(new Simbolo(" "));
+        for(i = 0; i < datos.length(); i++) {
+        	c = datos.charAt(i);
+        	
+        	if(c < 65 || c =='¿' || c =='¡') {
+	        	Iterator<Simbolo> it = this.fuente.getSimbolos().iterator();
+				Simbolo s = (Simbolo) it.next();
+				while(it.hasNext() && !s.getId().equals(String.valueOf(c)))
+					s = it.next();
+				if(s.getId().equals(String.valueOf(c)))
+					s.setFrecuencia(s.getFrecuencia()+1);
+				else
+					this.fuente.getSimbolos().add(new Simbolo(String.valueOf(c)));
+        	}
+        }
+        
+        StringTokenizer st = new StringTokenizer(datos, " ¡¿:.,;!?\n\"");
+        while (st.hasMoreTokens()) {
+			i++;
+        	simbolo = st.nextToken();
+        	Iterator<Simbolo> it = this.fuente.getSimbolos().iterator();
 			Simbolo s = (Simbolo) it.next();
-			while(it.hasNext() && !s.getCodigo().equals(codigo))
+			while(it.hasNext() && !s.getId().equals(simbolo))
 				s = it.next();
-			if(s.getCodigo().equals(codigo))
+			if(s.getId().equals(simbolo))
 				s.setFrecuencia(s.getFrecuencia()+1);
 			else
-				this.fuente.getSimbolos().add(new Simbolo(codigo));
+				this.fuente.getSimbolos().add(new Simbolo(simbolo));
 		}
-		*/	
+        this.probabilidad_Independiente(i);
 	}
 	
 	
@@ -89,12 +110,12 @@ public class Compresion {
 	}
 
 
-	public void probabilidad_Independiente() {
+	public void probabilidad_Independiente(int size) {
 		
 		Iterator<Simbolo> it = this.fuente.getSimbolos().iterator();
 		while(it.hasNext()) {
 			Simbolo s = it.next();
-			s.setProbabilidad((double)s.getFrecuencia()/(datos.length()/*/this.digitos*/));
+			s.setProbabilidad((double)s.getFrecuencia()/size);
 		}
 	}
 	
@@ -137,40 +158,69 @@ public class Compresion {
 		}
 	}
 	
-	
-	public void rebuild_File(String nombre,Fuente huffman) {
-		int a,b;
-		String codigo;
+	public void compression_Rate(String nombre_archivo) {
+		int auxFile;
+		double tamComprimido=622,tamOrig=0;
 		
-		a = 0;
-		//b = this.digitos;
+		FileReader fr = null;
+		BufferedReader br = null;
+		try {
+			fr = new FileReader(nombre_archivo);
+			br = new BufferedReader(fr);
+			
+			while ((auxFile = br.read()) != -1) {
+				String binary = Integer.toBinaryString(auxFile);
+				tamOrig+=binary.length();	
+			}
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		double N = tamOrig/tamComprimido;
+		System.out.println("Tasa Compresion "+N+":1");
+		
+	}
+	
+	
+	public void rebuild_File(String nombre_archivo,Fuente huffman) {
+		char c;
+		int i;
 		
 		StringBuilder codificacion = new StringBuilder();
-		/*
-		while ( b <= datos.length() ) {
+		StringBuilder simbolo = new StringBuilder();
+		
+		for(i = 0; i < datos.length(); i++) {
+			c = datos.charAt(i);
 			
-			codigo = datos.substring(a, b);
-			
-			Iterator<Simbolo> it = this.fuente.getSimbolos().iterator();
-			Simbolo s = (Simbolo) it.next();
-			while(it.hasNext() && !s.getCodigo().equals(codigo))
-				s = it.next();
-			
-			it = huffman.getSimbolos().iterator();
-			Simbolo sH = (Simbolo) it.next();
-			while(it.hasNext() && s.getId() != sH.getId() )
-				sH = it.next();
-			
-			
-			codificacion.append(sH.getCodigo());
-			
-			
-			//a += this.digitos;
-			//b += this.digitos;
-			
+			if(c < 65 || c =='¿' || c =='¡') {
+				Iterator<Simbolo> it;
+				Simbolo s;
+				
+				if(simbolo.length() > 0) {
+					it = this.fuente.getSimbolos().iterator();
+					s = (Simbolo) it.next();
+					while(it.hasNext() && !s.getId().equals(simbolo.toString()))
+						s = it.next();
+					codificacion.append(s.getCodigo());
+					simbolo = new StringBuilder();
+				}
+				
+				it = this.fuente.getSimbolos().iterator();
+				s = (Simbolo) it.next();
+				while(it.hasNext() && !s.getId().equals(String.valueOf(c)))
+					s = it.next();
+				codificacion.append(s.getCodigo());
+			}
+			else
+				simbolo.append(c);
 		}
-		*/
-		this.writeFile(nombre,codificacion.toString());
+		
+		this.writeFile(nombre_archivo,codificacion.toString());
 	}
 }
 

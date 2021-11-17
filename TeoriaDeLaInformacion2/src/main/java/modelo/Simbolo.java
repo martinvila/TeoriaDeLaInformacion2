@@ -3,19 +3,17 @@ package modelo;
 public class Simbolo implements Cloneable, Comparable<Object>{
 	
 	private String codigo;
-	private static int sig_id = 0;
-	private int id;
+	private String id;
 	private int frecuencia;
 	private double cantidad_informacion;
 	private double probabilidad;
 	
 	
-	public Simbolo(String codigo) {
-		this.codigo = codigo;
+	public Simbolo(String id) {
+		this.id = id;
 		this.frecuencia = 1;
 		this.cantidad_informacion = 0;
 		this.probabilidad = 0;
-		this.id = ++sig_id;
 	}
 
 	
@@ -59,23 +57,13 @@ public class Simbolo implements Cloneable, Comparable<Object>{
 	}
 	
 	
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 
 	
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
-	}
-
-	
-	public static int getSig_id() {
-		return sig_id;
-	}
-
-
-	public static void setSig_id(int sig_id) {
-		Simbolo.sig_id = sig_id;
 	}
 
 
