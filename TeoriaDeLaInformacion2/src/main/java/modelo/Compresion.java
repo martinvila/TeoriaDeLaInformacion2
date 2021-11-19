@@ -102,27 +102,26 @@ public class Compresion {
 	}
 	
 	
-	public void genera_fuente_img() {
+	public void genera_fuente_2(boolean flag) { // flag = true -> texto --- flag = false -> img
 		int i,size;
 		char c;
-		String simbolo;
+		Simbolo s = null;
 		
 		size=0;
-		this.fuente.getSimbolos().add(new Simbolo("0"));
-		this.fuente.getSimbolos().get(0).setFrecuencia(0);
-        for(i = 9; i < datos.length(); i++) {
+        for(i = 8; i < datos.length(); i++) {
         	c = datos.charAt(i);
         	
-        	if(c != 10) {
+        	if( flag || (!flag && c != 10)) {
         		size++;
 	        	Iterator<Simbolo> it = this.fuente.getSimbolos().iterator();
-				Simbolo s = (Simbolo) it.next();
-				while(it.hasNext() && !s.getId().equals(String.valueOf(c)))
+				while(s != null && it.hasNext() && !s.getId().equals(String.valueOf(c)))
 					s = it.next();
-				if(s.getId().equals(String.valueOf(c)))
+				if(s != null && s.getId().equals(String.valueOf(c)))
 					s.setFrecuencia(s.getFrecuencia()+1);
-				else
+				else {
 					this.fuente.getSimbolos().add(new Simbolo(String.valueOf(c)));
+					s = this.fuente.getSimbolos().get(0);
+				}
         	}
         }
         this.probabilidad_Independiente(size);
@@ -210,8 +209,7 @@ public class Compresion {
 		}
 		
 		n = sizeOrig/sizeCompr;
-		System.out.println("Tasa de compresion " + n + ":1");
-		
+		System.out.println("Tasa de compresion " + ((double)Math.round(n * 100) / 100) + ":1");
 	}
 	
 	public void shannonFano(Fuente fuente_ShannonFano,int i, int k, int m) {
@@ -259,31 +257,35 @@ public class Compresion {
 		}
 	}
 	
-	public void rlc(String nombre_archivo) {
+	
+	public void rlc(String nombre_archivo,int inicio, int avance) {
 		int i,frecuencia;
-		char c,c_ant;
+		char c,c_sig;
 		
 		StringBuilder codificacion = new StringBuilder();
 		
-		i = 0;
-		while( i < datos.length()-1) {
-        	c_ant = datos.charAt(i);
-        	c = datos.charAt(++i);
-        	frecuencia = 1;
-        	while((i < datos.length()-1) && c == c_ant) {
+		i = inicio;
+		c = datos.charAt(i);
+		i += avance;
+		frecuencia = 1;
+		while( i < datos.length()) {
+        	c_sig = datos.charAt(i);
+        	if (c == c_sig) 
         		frecuencia++;
-        		c_ant = c;
-        		c = datos.charAt(++i);
+        	else {
+        		codificacion.append(c);
+        		codificacion.append(frecuencia+" ");
+        		frecuencia = 1;        		
         	}
-        	codificacion.append(c_ant);
-        	codificacion.append(frecuencia);
-
+        	i += avance;
+        	c = c_sig;
 		}
-		System.out.println(codificacion.toString());
+		codificacion.append(c);
+		codificacion.append(frecuencia);
 		
-		this.writeFile(nombre_archivo,codificacion.toString());     
-        	
+		this.writeFile(nombre_archivo,codificacion.toString());       	
 	}
+	
 	
 	public void rebuild_File(String nombre_archivo,Fuente huffman) {
 		char c;
