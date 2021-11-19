@@ -72,7 +72,19 @@ public class Canal {
 	
 	public void informacion_mutua() {
 		
-		this.informacion_mutua = this.entropia(this.entrada) - this.equivocacion;
+		this.informacion_mutua = (double)Math.round((this.entropia(this.entrada) - this.equivocacion) * 10000) / 10000;
+	}
+	
+	
+	public double perdida() {
+		double resultado=0;
+		
+		for(int i=0; i < this.entrada.length; i++) {
+			for(int j=0; j < this.matriz_p[0].length; j++)
+				if(matriz_p[i][j] != 0)
+					resultado += matriz_p[i][j] * entrada[i] * (Math.log(1/matriz_p[i][j])/Math.log(2));
+		}
+		return resultado;
 	}
 
 
