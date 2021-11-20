@@ -47,7 +47,7 @@ public class Imagen {
 		
 		Compresion compression_rlc = new Compresion();
 
-		compression_rlc.readFile("Prueba.txt");
+		compression_rlc.readFile("imagen.raw");
 		compression_rlc.genera_fuente_2(false);
 		compression_rlc.getFuente().calcula_cantInformacion();
 		compression_rlc.getFuente().calcula_entropia();

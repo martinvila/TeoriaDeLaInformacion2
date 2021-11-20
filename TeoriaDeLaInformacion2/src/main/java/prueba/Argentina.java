@@ -1,7 +1,6 @@
 package prueba;
 
 import java.util.Collections;
-
 import modelo.Compresion;
 
 public class Argentina {
@@ -23,6 +22,7 @@ public class Argentina {
 		compression_huffman.compression_Rate(4976,"Argentina.txt");
 		System.out.println("Rendimiento: "+compression_huffman.getFuente().getRendimiento()*100+"%");
 		System.out.println("Redundancia: "+(double)Math.round(((1-compression_huffman.getFuente().getRendimiento())* 100) * 10000) / 10000 +"%");
+		
 		
 		
 		System.out.println("\n--------------------- SHANNON FANO ---------------------\n");
