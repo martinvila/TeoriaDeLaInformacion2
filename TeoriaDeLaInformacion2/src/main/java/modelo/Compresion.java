@@ -8,7 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.StringTokenizer;
 
 
 public class Compresion {
@@ -20,8 +19,7 @@ public class Compresion {
 	public Compresion() {
 		this.fuente = new Fuente();
 	}
-	
-	
+
 
 
 	public void readFile(String nombre_archivo) {
@@ -61,48 +59,7 @@ public class Compresion {
 	}
 	
 	
-	public void genera_Fuente() {
-		int i,size;
-		char c;
-		String simbolo;
-		
-		size=0;
-		this.fuente.getSimbolos().add(new Simbolo(" "));
-		this.fuente.getSimbolos().get(0).setFrecuencia(0);
-        for(i = 0; i < datos.length(); i++) {
-        	c = datos.charAt(i);
-        	
-        	if(c < 65 || c =='¿' || c =='¡' || c =='«' || c =='»') {
-        		size++;
-	        	Iterator<Simbolo> it = this.fuente.getSimbolos().iterator();
-				Simbolo s = (Simbolo) it.next();
-				while(it.hasNext() && !s.getId().equals(String.valueOf(c)))
-					s = it.next();
-				if(s.getId().equals(String.valueOf(c)))
-					s.setFrecuencia(s.getFrecuencia()+1);
-				else
-					this.fuente.getSimbolos().add(new Simbolo(String.valueOf(c)));
-        	}
-        }
-        
-        StringTokenizer st = new StringTokenizer(datos, " '»«-¡¿:.,;!?\n\"");
-        while (st.hasMoreTokens()) {
-			size++;
-        	simbolo = st.nextToken();
-        	Iterator<Simbolo> it = this.fuente.getSimbolos().iterator();
-			Simbolo s = (Simbolo) it.next();
-			while(it.hasNext() && !s.getId().equals(simbolo))
-				s = it.next();
-			if(s.getId().equals(simbolo))
-				s.setFrecuencia(s.getFrecuencia()+1);
-			else
-				this.fuente.getSimbolos().add(new Simbolo(simbolo));
-		}
-        this.probabilidad_Independiente(size);
-	}
-	
-	
-	public void genera_fuente_2(boolean flag) { // flag = true -> texto --- flag = false -> img
+	public void genera_fuente(boolean text) { // text = true -> texto --- text = false -> imagen
 		int i,size;
 		char c;
 		Simbolo s = null;
@@ -111,7 +68,7 @@ public class Compresion {
         for(i = 8; i < datos.length(); i++) {
         	c = datos.charAt(i);
         	
-        	if( flag || (!flag && c != 10)) {
+        	if( text || (!text && c != 10)) {
         		size++;
 	        	Iterator<Simbolo> it = this.fuente.getSimbolos().iterator();
 				while(s != null && it.hasNext() && !s.getId().equals(String.valueOf(c)))
@@ -186,6 +143,7 @@ public class Compresion {
 		}
 	}
 	
+	
 	public void compression_Rate(double sizeCompr, String nombre_archivo) {
 		int c = 0;
 		double n,sizeOrig;
@@ -211,6 +169,7 @@ public class Compresion {
 		n = sizeOrig/sizeCompr;
 		System.out.println("Tasa de compresion " + ((double)Math.round(n * 100) / 100) + ":1");
 	}
+	
 	
 	public void shannonFano(Fuente fuente_ShannonFano,int i, int k, int m) {
 		double sum,sum2,dif,min;
@@ -274,7 +233,7 @@ public class Compresion {
         		frecuencia++;
         	else {
         		codificacion.append(c);
-        		codificacion.append(frecuencia+" ");
+        		codificacion.append(frecuencia);
         		frecuencia = 1;        		
         	}
         	i += avance;
@@ -287,37 +246,21 @@ public class Compresion {
 	}
 	
 	
-	public void rebuild_File(String nombre_archivo,Fuente huffman) {
+	public void rebuild_file(String nombre_archivo,Fuente huffman) {
 		char c;
 		int i;
 		
 		StringBuilder codificacion = new StringBuilder();
-		StringBuilder simbolo = new StringBuilder();
 		
 		for(i = 0; i < datos.length(); i++) {
 			c = datos.charAt(i);
 			
-			if(c < 65 || c =='¿' || c =='¡' || c =='«' || c =='»') {
-				Iterator<Simbolo> it;
-				Simbolo s;
+			Iterator<Simbolo> it = this.fuente.getSimbolos().iterator();
+			Simbolo s = (Simbolo) it.next();
 				
-				if(simbolo.length() > 0) {
-					it = this.fuente.getSimbolos().iterator();
-					s = (Simbolo) it.next();
-					while(it.hasNext() && !s.getId().equals(simbolo.toString()))
-						s = it.next();
-					codificacion.append(s.getCodigo());
-					simbolo = new StringBuilder();
-				}
-				
-				it = this.fuente.getSimbolos().iterator();
-				s = (Simbolo) it.next();
-				while(it.hasNext() && !s.getId().equals(String.valueOf(c)))
-					s = it.next();
-				codificacion.append(s.getCodigo());
-			}
-			else
-				simbolo.append(c);
+			while(it.hasNext() && !s.getId().equals(String.valueOf(c)))
+				s = it.next();
+			codificacion.append(s.getCodigo());
 		}
 		
 		this.writeFile(nombre_archivo,codificacion.toString());
